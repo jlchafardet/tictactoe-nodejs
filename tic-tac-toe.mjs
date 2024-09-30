@@ -1,7 +1,9 @@
 import promptSync from 'prompt-sync';
 import chalk from 'chalk';
+import fs from 'fs';
 
 const prompt = promptSync();
+const scoreFile = 'score.json';
 
 console.log("Starting Tic-Tac-Toe Game...");
 
@@ -74,9 +76,40 @@ function checkDraw() {
   return board.flat().every(cell => cell !== ' ');
 }
 
+// Function to reset the board
+function resetBoard() {
+  board = [
+    [' ', ' ', ' '],
+    [' ', ' ', ' '],
+    [' ', ' ', ' ']
+  ];
+}
+
+// Function to read the score from the JSON file
+function readScore() {
+  if (!fs.existsSync(scoreFile)) {
+    return { playerWins: 0, computerWins: 0, ties: 0 };
+  }
+  const data = fs.readFileSync(scoreFile);
+  return JSON.parse(data);
+}
+
+// Function to write the score to the JSON file
+function writeScore(score) {
+  fs.writeFileSync(scoreFile, JSON.stringify(score, null, 2));
+}
+
+// Function to display the score
+function displayScore(score) {
+  console.log(chalk.green(`Player Wins: ${score.playerWins}`));
+  console.log(chalk.hex('#FFA500')(`Computer Wins: ${score.computerWins}`));
+  console.log(chalk.cyan(`Ties: ${score.ties}`));
+}
+
 // Main game loop
 function playGame() {
   let currentPlayer = 'X';
+  const score = readScore();
   while (true) {
     displayBoard();
     makeMove(currentPlayer);
@@ -84,20 +117,39 @@ function playGame() {
       displayBoard();
       if (currentPlayer === 'X') {
         console.log(chalk.green(`Player ${chalk.blue('Player')} wins!`));
+        score.playerWins++;
       } else {
         console.log(chalk.hex('#FFA500')(`Player ${chalk.red('Computer')} wins!`)); // Custom orange color
+        score.computerWins++;
       }
       break;
     }
     if (checkDraw()) {
       displayBoard();
       console.log(chalk.cyan('The game is a draw!'));
+      score.ties++;
       break;
     }
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
   }
+  writeScore(score);
+}
+
+// Function to start the game and ask if the player wants to play again
+function startGame() {
+  while (true) {
+    playGame();
+    const playAgain = prompt('Do you want to play again? (y/n): ').toLowerCase();
+    if (playAgain !== 'y') {
+      console.log("Thanks for playing!");
+      const score = readScore();
+      displayScore(score);
+      break;
+    }
+    resetBoard();
+  }
 }
 
 // Start the game
-playGame();
+startGame();
 console.log("Game Over");
