@@ -25,7 +25,7 @@ function displayBoard() {
   });
 }
 
-// Function to make a move //
+// Function to make a move
 function makeMove(player) {
   let position, row, col;
   if (player === 'X') {
@@ -82,12 +82,16 @@ function playGame() {
     makeMove(currentPlayer);
     if (checkWin(currentPlayer)) {
       displayBoard();
-      console.log(`Player ${currentPlayer} wins!`);
+      if (currentPlayer === 'X') {
+        console.log(chalk.green(`Player ${chalk.blue('Player')} wins!`));
+      } else {
+        console.log(chalk.orange(`Player ${chalk.red('Computer')} wins!`));
+      }
       break;
     }
     if (checkDraw()) {
       displayBoard();
-      console.log('The game is a draw!');
+      console.log(chalk.cyan('The game is a draw!'));
       break;
     }
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
