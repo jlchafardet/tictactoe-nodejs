@@ -28,7 +28,7 @@ function displayBoard() {
 }
 
 // Function to make a move
-function makeMove(player) {
+function makeMove(player, smartMode) {
   let position, row, col;
   if (player === 'X') {
     while (true) {
@@ -47,13 +47,18 @@ function makeMove(player) {
       }
     }
   } else {
-    // Simple AI for computer move
-    do {
-      position = Math.floor(Math.random() * 9) + 1;
-      row = Math.floor((position - 1) / 3);
-      col = (position - 1) % 3;
-    } while (board[row][col] !== ' ');
-    console.log(`Computer ${player} moves to position ${position}`);
+    if (smartMode) {
+      const bestMove = findBestMove();
+      row = bestMove.row;
+      col = bestMove.col;
+    } else {
+      do {
+        position = Math.floor(Math.random() * 9) + 1;
+        row = Math.floor((position - 1) / 3);
+        col = (position - 1) % 3;
+      } while (board[row][col] !== ' ');
+    }
+    console.log(`Computer ${player} moves to position ${row * 3 + col + 1}`);
     board[row][col] = player;
   }
 }
@@ -106,13 +111,74 @@ function displayScore(score) {
   console.log(chalk.cyan(`Ties: ${score.ties}`));
 }
 
+// Minimax algorithm to find the best move
+function minimax(board, depth, isMaximizing) {
+  const scores = {
+    'O': 10,
+    'X': -10,
+    'tie': 0
+  };
+
+  if (checkWin('O')) return scores['O'];
+  if (checkWin('X')) return scores['X'];
+  if (checkDraw()) return scores['tie'];
+
+  if (isMaximizing) {
+    let bestScore = -Infinity;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (board[i][j] === ' ') {
+          board[i][j] = 'O';
+          let score = minimax(board, depth + 1, false);
+          board[i][j] = ' ';
+          bestScore = Math.max(score, bestScore);
+        }
+      }
+    }
+    return bestScore;
+  } else {
+    let bestScore = Infinity;
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        if (board[i][j] === ' ') {
+          board[i][j] = 'X';
+          let score = minimax(board, depth + 1, true);
+          board[i][j] = ' ';
+          bestScore = Math.min(score, bestScore);
+        }
+      }
+    }
+    return bestScore;
+  }
+}
+
+// Function to find the best move for the computer
+function findBestMove() {
+  let bestScore = -Infinity;
+  let move = { row: -1, col: -1 };
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (board[i][j] === ' ') {
+        board[i][j] = 'O';
+        let score = minimax(board, 0, false);
+        board[i][j] = ' ';
+        if (score > bestScore) {
+          bestScore = score;
+          move = { row: i, col: j };
+        }
+      }
+    }
+  }
+  return move;
+}
+
 // Main game loop
-function playGame() {
+function playGame(smartMode) {
   let currentPlayer = 'X';
   const score = readScore();
   while (true) {
     displayBoard();
-    makeMove(currentPlayer);
+    makeMove(currentPlayer, smartMode);
     if (checkWin(currentPlayer)) {
       displayBoard();
       if (currentPlayer === 'X') {
@@ -138,7 +204,8 @@ function playGame() {
 // Function to start the game and ask if the player wants to play again
 function startGame() {
   while (true) {
-    playGame();
+    const smartMode = prompt('Do you want to play against a smart computer? (y/n): ').toLowerCase() === 'y';
+    playGame(smartMode);
     const playAgain = prompt('Do you want to play again? (y/n): ').toLowerCase();
     if (playAgain !== 'y') {
       console.log("Thanks for playing!");
