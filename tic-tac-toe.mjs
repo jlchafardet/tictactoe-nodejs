@@ -14,37 +14,42 @@ let board = [
 
 // Function to display the game board
 function displayBoard() {
-  console.log(chalk.yellow('  0 1 2'));
+  console.log(chalk.yellow('  1 2 3'));
   board.forEach((row, index) => {
-    console.log(chalk.yellow(index), row.map(cell => {
+    console.log(chalk.yellow(index * 3 + 1), row.map(cell => {
       if (cell === 'X') return chalk.blue(cell);
       if (cell === 'O') return chalk.red(cell);
       return cell;
     }).join('|'));
   });
 }
-
-// Function to make a move
+// Function to make a move //
 function makeMove(player) {
-  let row, col;
+  let position, row, col;
   if (player === 'X') {
     while (true) {
-      row = parseInt(prompt(`Player ${player}, enter row (0, 1, 2): `));
-      col = parseInt(prompt(`Player ${player}, enter column (0, 1, 2): `));
-      if (row >= 0 && row < 3 && col >= 0 && col < 3 && board[row][col] === ' ') {
-        board[row][col] = player;
-        break;
+      position = parseInt(prompt(`Player ${player}, enter position (1-9): `));
+      if (position >= 1 && position <= 9) {
+        row = Math.floor((position - 1) / 3);
+        col = (position - 1) % 3;
+        if (board[row][col] === ' ') {
+          board[row][col] = player;
+          break;
+        } else {
+          console.log('Position already taken, try again.');
+        }
       } else {
-        console.log('Invalid move, try again.');
+        console.log('Invalid position, try again.');
       }
     }
   } else {
     // Simple AI for computer move
     do {
-      row = Math.floor(Math.random() * 3);
-      col = Math.floor(Math.random() * 3);
+      position = Math.floor(Math.random() * 9) + 1;
+      row = Math.floor((position - 1) / 3);
+      col = (position - 1) % 3;
     } while (board[row][col] !== ' ');
-    console.log(`Computer ${player} moves to (${row}, ${col})`);
+    console.log(`Computer ${player} moves to position ${position}`);
     board[row][col] = player;
   }
 }
