@@ -85,7 +85,7 @@ function playGame() {
       if (currentPlayer === 'X') {
         console.log(chalk.green(`Player ${chalk.blue('Player')} wins!`));
       } else {
-        console.log(chalk.orange(`Player ${chalk.red('Computer')} wins!`));
+        console.log(chalk.hex('#FFA500')(`Player ${chalk.red('Computer')} wins!`)); // Custom orange color
       }
       break;
     }
