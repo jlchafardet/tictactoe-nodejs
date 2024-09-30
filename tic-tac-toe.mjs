@@ -14,6 +14,7 @@ let board = [
 
 // Function to display the game board
 function displayBoard() {
+  console.clear();
   console.log(chalk.yellow('  1 2 3'));
   board.forEach((row, index) => {
     console.log(chalk.yellow(index * 3 + 1), row.map(cell => {
@@ -23,6 +24,7 @@ function displayBoard() {
     }).join('|'));
   });
 }
+
 // Function to make a move //
 function makeMove(player) {
   let position, row, col;
